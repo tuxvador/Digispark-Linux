@@ -59,7 +59,8 @@ def binToIno(path):
     if not os.path.isdir(ino_dir):
         os.mkdir(ino_dir)
     ino_file = _safe_path(ino_dir, directory + ".ino")
-    cmd = ["python3", "./exes/duck2spark.py", "-i", path, "-l", "1", "-o", ino_file]
+    safe_ino = os.path.join(os.path.realpath(ino_dir), os.path.basename(ino_file))
+    cmd = ["python3", "./exes/duck2spark.py", "-i", path, "-l", "1", "-o", safe_ino]
     subprocess.run(cmd, check=True)
 
 def main():

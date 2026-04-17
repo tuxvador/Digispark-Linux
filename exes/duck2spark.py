@@ -139,7 +139,8 @@ def main(argv):
 	if ofile is None:
 		print(result)
 	else:
-		with _safe_open(ofile, "w") as f:
+		safe_ofile = os.path.join(os.path.realpath(os.getcwd()), os.path.basename(ofile))
+		with _safe_open(safe_ofile, "w") as f:
 			f.write(result)
 			print("Binary2script Complete..... [ OK ]")
 
