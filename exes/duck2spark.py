@@ -121,7 +121,7 @@ def main(argv):
 			with _safe_open(arg, "rb") as f:
 				payload = f.read()
 		elif opt in ("-o", "--output"):
-			ofile = arg
+			ofile = os.path.basename(arg)
 		elif opt in ("-l", "--loopcount"):
 			loop_count = int(arg)
 		elif opt in ("-f", "--initdelay"):
