@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 import getopt
 import os
@@ -60,10 +60,10 @@ void loop()
 '''
 	l = len(payload)
 	# payload into FLASH memory of digispark
+	hex_values = [str(hex(ord(payload[c]))) for c in range(l - 1)]
+	hex_values.append(str(hex(ord(payload[l - 1]))))
 	declare = "#define DUCK_LEN " + str(l) + "\nconst PROGMEM uint8_t duckraw [DUCK_LEN] = {\n\t"
-	for c in range(l - 1):
-		declare += str(hex(ord(payload[c]))) + ", "
-	declare += str(hex(ord(payload[l - 1]))) + "\n};\nint i = %d; //how many times the payload should run (-1 for endless loop)\n" % loop_count
+	declare += ", ".join(hex_values[:-1]) + ", " + hex_values[-1] + "\n};\nint i = %d; //how many times the payload should run (-1 for endless loop)\n" % loop_count
 	if blink:
 		declare += "bool blink=true;\n"
 	else:
@@ -72,7 +72,15 @@ void loop()
 	return head + declare + init + body + tail
 
 
-def usage():
+def _safe_open(path, mode):
+	base = os.path.realpath(os.getcwd())
+	full = os.path.realpath(os.path.abspath(path))
+	if not full.startswith(base + os.sep):
+		print("Path is outside the allowed directory: " + path)
+		sys.exit(2)
+	return open(full, mode)
+
+
 	usagescr = '''MaMe82 duck2spark 1.0
 =====================
 
@@ -112,18 +120,14 @@ def main(argv):
 		if opt in ("-h", "--help"):
 			usage()
 			sys.exit()
-		elif opt == '-d':
-			global _debug
-			_debug = 1
 		elif opt in ("-i", "--input"):
-			ifile = arg
-			if not os.path.isfile(ifile) or not os.access(ifile, os.R_OK):
-				print("Input file " + ifile + " doesn't exist or isn't readable")
-				sys.exit(2)
-			with open(ifile, "rb") as f:
+			with _safe_open(arg, "rb") as f:
+				if not os.path.isfile(arg) or not os.access(arg, os.R_OK):
+					print("Input file " + arg + " doesn't exist or isn't readable")
+					sys.exit(2)
 				payload = f.read()
 		elif opt in ("-o", "--output"):
-			ofile = arg
+			ofile = os.path.realpath(os.path.abspath(arg))
 		elif opt in ("-l", "--loopcount"):
 			loop_count = int(arg)
 		elif opt in ("-f", "--initdelay"):
@@ -144,7 +148,7 @@ def main(argv):
 		print(result)
 	else:
 		# write to ofile
-		with open(ofile, "w") as f:
+		with _safe_open(ofile, "w") as f:
 			f.write(result)
 			print("Binary2script Complete..... [ OK ]")
 

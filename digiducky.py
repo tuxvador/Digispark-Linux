@@ -1,73 +1,73 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Coding : utf-8
 """
     Script : ducky2spark
-    Version : 1.0
+    Version : 1.1
     function : convert ducky scripts to binary and arduino files
 """
 
-#imports
 import os
-from fnmatch import fnmatch
-from subprocess import Popen,PIPE
+import subprocess
 
-#Strings used in programme
+VALID_MAPPINGS = ["be","ca","ch","de","dk","es","fr","gb","it","no","pt","ru","sv","uk","us"]
+
 cf2c = "\nChoose file to convert : "
 cb2i = "Convert ducky script to arduino script"
-cd2i = "Concert binary file to arduino script"
+cd2i = "Convert binary file to arduino script"
 wiyc = "\nWhat is your choice : "
-convbin = "Converting file to bin"
-convino = "Converting file to ino"
-duckencoder = "java -jar ./exes/duckencoder.jar -i "
-ducky2spark = "python ./exes/duck2spark.py -i "
 choosemapping = "Choose keyboard mapping to use : "
+
+def _safe_path(base, filename):
+    """Resolve path and ensure it stays within base directory."""
+    base = os.path.realpath(os.path.abspath(base))
+    full = os.path.realpath(os.path.abspath(os.path.join(base, os.path.basename(filename))))
+    if not full.startswith(base + os.sep):
+        raise ValueError("Invalid path: " + filename)
+    return full
 
 def choosefile(path):
     files = []
-    length = 0
+    for entry in os.walk(path):
+        files = entry[2]
+        break
 
-    for files in os.walk(path):
-        length = len(files)
-        files = files[2]
-
+    for i, j in enumerate(files):
+        print(str(i+1) + ") " + j)
     choix = -1
-    for i,j in enumerate(files):
-        print(str(i+1)+") "+j)
-    while choix not in range(0,length):
-        choix = int(raw_input(cf2c))-1
-    path = path+files[choix]+" "
-    return path
+    while choix not in range(len(files)):
+        choix = int(input(cf2c)) - 1
+    return _safe_path(path, files[choix])
 
 def duckToIno():
-    global duckencoder
     mapping = ""
-    path = choosefile("./scripts/")
-    filename = path[10:-6]
-    while mapping not in ["be","ca","ch","de","dk","es","fr","gb","it","no","pt","ru","sv","uk","us"]:
-        mapping = raw_input(choosemapping)
-    duckencoder = duckencoder+path+"-o ./bin/"+filename+".bin -l "+mapping
-    filename = "./bin/"+filename+".bin"
-    execute = os.popen(duckencoder).read()
-    print(execute)
-    binToIno(filename)
+    filepath = choosefile("./scripts/")
+    filename = os.path.splitext(os.path.basename(filepath))[0]
+    while mapping not in VALID_MAPPINGS:
+        mapping = input(choosemapping)
+    bin_path = _safe_path("./bin", filename + ".bin")
+    cmd = ["java", "-jar", "./exes/duckencoder.jar", "-i", filepath,
+           "-o", bin_path, "-l", mapping]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    print(result.stdout)
+    binToIno(bin_path)
 
 def binToIno(path):
-    global ducky2spark
-    directory = path[6:-4]
-    isdir = os.path.isdir("./ino/"+directory)
-    print("Dir : "+directory)
-    if(isdir == False):
-        os.mkdir("./ino/"+directory)
-    ducky2spark = ducky2spark+path+" -l 1 -o ./ino/"+directory+"/"+directory+".ino"
-    #print(ducky2spark)
-    execute = os.system(ducky2spark)
+    path = os.path.realpath(path)
+    directory = os.path.splitext(os.path.basename(path))[0]
+    ino_dir = _safe_path("./ino", directory)
+    print("Dir : " + directory)
+    if not os.path.isdir(ino_dir):
+        os.mkdir(ino_dir)
+    ino_file = _safe_path(ino_dir, directory + ".ino")
+    cmd = ["python3", "./exes/duck2spark.py", "-i", path, "-l", "1", "-o", ino_file]
+    subprocess.run(cmd, check=True)
 
 def main():
-    choix = ""
-    while(choix not in [1,2]):
-        print("1) "+cd2i)
-        print("2) "+cb2i)
-        choix = int(raw_input(wiyc))
+    choix = 0
+    while choix not in [1, 2]:
+        print("1) " + cd2i)
+        print("2) " + cb2i)
+        choix = int(input(wiyc))
     if choix == 1:
         binToIno(choosefile("./bin/"))
     if choix == 2:

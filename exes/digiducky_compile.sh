@@ -42,8 +42,8 @@ void setup(){
 " > $OUTFILE
 while read -r
 do
-  COMMAND=`echo -E "$REPLY" | sed -e 's/ .*$//g'`
-  OPTIONS=`echo -E "$REPLY" | sed -s 's/^[^ ]* //g'`
+  COMMAND=$(echo -E "$REPLY" | sed -e 's/ .*$//g')
+  OPTIONS=$(echo -E "$REPLY" | sed -s 's/^[^ ]* //g')
   MODIFIERS="0";
   KEY1="0";
   KEY2="0";
@@ -52,11 +52,11 @@ do
   then echo "  // $OPTIONS" >> $OUTFILE
   elif [ "$COMMAND" = "STRING" ] 
   then 
-    OPTIONS=`echo "$OPTIONS" | sed -e 's/\\\\/\\\\\\\\/g' -e 's/"/\\\"/g'`
+    OPTIONS=$(echo "$OPTIONS" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
     IFS=" "
     echo "	DigiKeyboard.print(\"$OPTIONS\");" >> $OUTFILE
   elif [ "$COMMAND" = "DELAY" ]
-  then DELAY=$(( $OPTIONS * 10 )); echo "  DigiKeyboard.delay(${DELAY});" >> $OUTFILE
+  then DELAY=$(( OPTIONS * 10 )); echo "  DigiKeyboard.delay(${DELAY});" >> $OUTFILE
   else
     for TOKEN in $REPLY
     do KEY=""
@@ -83,7 +83,7 @@ do
       else KEY=$TOKEN
       fi
       if [ "$KEY" != "" ]
-      then KEY=`echo $KEY | tr [a-z] [A-Z]`
+      then KEY=$(echo "$KEY" | tr '[:lower:]' '[:upper:]')
         if [ "$KEY1" = "0" ]
         then KEY1="KEY_$KEY";
         else KEY2="KEY_$KEY";
