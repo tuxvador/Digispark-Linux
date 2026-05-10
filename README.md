@@ -4,11 +4,20 @@ This project provides a simple solution to transform a Digispark microcontroller
 ## Features
 - Convert DuckyScript to Arduino sketch targeting Digispark
 - Convert binary scripts generated with DuckEncoder to Arduino sketch for Digispark
+- Upload sketches directly to Digispark from the command line
 
 ## Project Structure
 ```
+├── .gitignore    # Git ignore rules
+├── LICENSE       # MIT license
+├── requirements.txt  # Python dependencies (stdlib only)
 ├── bin/          # Compiled .bin payloads
-├── exes/         # Conversion tools (duck2spark.py, digiducky_compile.sh, duckencoder.jar)
+├── exes/         # Conversion and upload tools
+│   ├── duck2spark.py         # Binary-to-Arduino converter
+│   ├── digiducky_compile.sh  # DuckyScript-to-Arduino compiler
+│   ├── upload.sh             # CLI compile + upload helper
+│   ├── duckencoder.jar       # Hak5 DuckEncoder
+│   └── Ducky_Encoder_GUI.jar # GUI DuckEncoder
 ├── ino/          # Generated Arduino sketches
 ├── scripts/      # DuckyScript source files
 └── digiducky.py  # Main entry point
@@ -37,6 +46,7 @@ echo "STRING Hello world" > scripts/example.duck
 3. Choose the conversion type:
    - `1` — Convert binary file to Arduino sketch
    - `2` — Convert DuckyScript to Arduino sketch
+   - `3` — Upload sketch to Digispark
 4. Follow the prompts to select the file and keyboard mapping.
 5. Open the generated `.ino` file from the `ino/` folder in the Arduino IDE.
 6. Click **Upload** and plug in the Digispark when prompted.
