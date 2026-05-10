@@ -30,7 +30,7 @@ if [[ "$INPUT" == *.duck ]]; then
     mkdir -p "$OUT_DIR"
     OUT_INO="$OUT_DIR/$(basename "$INPUT" .duck).ino"
     echo "Converting DuckyScript to Arduino sketch..."
-    bash "$SCRIPT_DIR/digiducky_compile.sh" "$INPUT" "$OUT_INO"
+    python3 "$SCRIPT_DIR/digiducky_compile.py" "$INPUT" "$OUT_INO"
     echo "Saved to $OUT_INO"
     INPUT="$OUT_INO"
     SKETCH_DIR=$(dirname "$INPUT")

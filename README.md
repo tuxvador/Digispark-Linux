@@ -14,7 +14,7 @@ This project provides a simple solution to transform a Digispark microcontroller
 ├── bin/          # Compiled .bin payloads
 ├── exes/         # Conversion and upload tools
 │   ├── duck2spark.py         # Binary-to-Arduino converter
-│   ├── digiducky_compile.sh  # DuckyScript-to-Arduino compiler
+│   ├── digiducky_compile.py  # DuckyScript-to-Arduino compiler
 │   ├── upload.sh             # CLI compile + upload helper
 │   ├── duckencoder.jar       # Hak5 DuckEncoder
 │   └── Ducky_Encoder_GUI.jar # GUI DuckEncoder

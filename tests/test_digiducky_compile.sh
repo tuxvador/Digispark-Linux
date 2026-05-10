@@ -24,7 +24,7 @@ STRING notepad
 ENTER
 EOF
 
-bash "$ROOT_DIR/exes/digiducky_compile.sh" "$TEST_DUCK" "$TEST_INO"
+python3 "$ROOT_DIR/exes/digiducky_compile.py" "$TEST_DUCK" "$TEST_INO"
 
 echo "Verifying generated sketch..."
 
