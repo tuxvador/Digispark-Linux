@@ -1,6 +1,14 @@
 #!/bin/bash
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <input.duck> <output.ino>"
+    exit 1
+fi
 INFILE=$1
 OUTFILE=$2
+if [ ! -f "$INFILE" ]; then
+    echo "Error: input file not found: $INFILE"
+    exit 1
+fi
 
 echo "
 #include "DigiKeyboard.h"

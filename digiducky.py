@@ -7,6 +7,7 @@
 """
 
 import os
+import sys
 import subprocess
 import glob
 
@@ -18,6 +19,7 @@ cf2c = "\nChoose file to convert : "
 cb2i = "Convert ducky script to arduino script"
 cd2i = "Convert binary file to arduino script"
 cu2i = "Upload sketch to Digispark"
+ce2i = "Exit"
 wiyc = "\nWhat is your choice : "
 choosemapping = "Choose keyboard mapping to use : "
 
@@ -37,6 +39,9 @@ def _get_int(prompt):
 
 def choosefile(path):
     files = [f for f in glob.glob(path + "**/*", recursive=True) if os.path.isfile(f)]
+    if not files:
+        print("No files found in " + path)
+        sys.exit(1)
 
     for i, j in enumerate(files):
         print(str(i+1) + ") " + os.path.relpath(j, path))
@@ -76,10 +81,11 @@ def upload_ino():
 
 def main():
     choix = 0
-    while choix not in [1, 2, 3]:
+    while choix not in [1, 2, 3, 4]:
         print("1) " + cd2i)
         print("2) " + cb2i)
         print("3) " + cu2i)
+        print("4) " + ce2i)
         choix = _get_int(wiyc)
     if choix == 1:
         binToIno(choosefile(os.path.join(BASE_DIR, "bin") + "/"))

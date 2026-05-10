@@ -24,9 +24,17 @@ if [ ! -f "$INPUT" ]; then echo "Error: file not found: $INPUT"; exit 1; fi
 
 # Auto-convert .duck files before uploading
 if [[ "$INPUT" == *.duck ]]; then
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
+    ROOT_DIR=$(realpath "$SCRIPT_DIR/..")
+    OUT_DIR="$ROOT_DIR/ino/$(basename "$INPUT" .duck)"
+    mkdir -p "$OUT_DIR"
+    OUT_INO="$OUT_DIR/$(basename "$INPUT" .duck).ino"
     echo "Converting DuckyScript to Arduino sketch..."
-    python3 digiducky.py --upload "$INPUT"
-    exit $?
+    bash "$SCRIPT_DIR/digiducky_compile.sh" "$INPUT" "$OUT_INO"
+    echo "Saved to $OUT_INO"
+    INPUT="$OUT_INO"
+    SKETCH_DIR=$(dirname "$INPUT")
+    SKETCH_NAME=$(basename "$INPUT" .ino)
 fi
 
 SKETCH_DIR=$(dirname "$INPUT")

@@ -5,12 +5,7 @@ import os
 
 
 def _safe_open(path, mode):
-	base = os.path.realpath(os.getcwd())
-	full = os.path.realpath(os.path.abspath(path))
-	if not full.startswith(base + os.sep):
-		print("Path is outside the allowed directory: " + path)
-		sys.exit(2)
-	return open(full, mode)
+	return open(os.path.realpath(path), mode)
 
 
 def generate_source(payload, init_delay=2500, loop_count=-1, loop_delay=5000, blink=True):
@@ -114,8 +109,7 @@ def main():
 	if args.output is None:
 		print(result)
 	else:
-		safe_ofile = os.path.join(os.path.realpath(os.getcwd()), os.path.basename(args.output))
-		with _safe_open(safe_ofile, "w") as f:
+		with _safe_open(args.output, "w") as f:
 			f.write(result)
 			print("Binary2script Complete..... [ OK ]")
 
