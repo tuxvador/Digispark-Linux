@@ -10,7 +10,7 @@ if [ ! -f "$INFILE" ]; then
     exit 1
 fi
 
-echo "
+cat > "$OUTFILE" << 'PREAMBLE'
 #include "DigiKeyboard.h"
 
 // Delay between keystrokes
@@ -39,7 +39,7 @@ void setup() {
 	// sure the computer knows the keyboard is alive and connected
 	DigiKeyboard.delay(KEYSTROKE_DELAY);
 
-" > $OUTFILE
+PREAMBLE
 
 while read -r
 do
@@ -96,9 +96,9 @@ do
 done < $INFILE
 echo "	}" >> $OUTFILE
 
-echo "
+cat >> "$OUTFILE" << 'POSTAMBLE'
 void loop(){
 	delay(1000);
 	iterationCounter++;
 }
-" >> $OUTFILE
+POSTAMBLE
