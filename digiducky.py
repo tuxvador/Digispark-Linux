@@ -8,12 +8,14 @@
 
 import os
 import subprocess
+import glob
 
 VALID_MAPPINGS = ["be","ca","ch","de","dk","es","fr","gb","it","no","pt","ru","sv","uk","us"]
 
 cf2c = "\nChoose file to convert : "
 cb2i = "Convert ducky script to arduino script"
 cd2i = "Convert binary file to arduino script"
+cu2i = "Upload sketch to Digispark"
 wiyc = "\nWhat is your choice : "
 choosemapping = "Choose keyboard mapping to use : "
 
@@ -26,17 +28,14 @@ def _safe_path(base, filename):
     return full
 
 def choosefile(path):
-    files = []
-    for entry in os.walk(path):
-        files = entry[2]
-        break
+    files = [f for f in glob.glob(path + "**/*", recursive=True) if os.path.isfile(f)]
 
     for i, j in enumerate(files):
-        print(str(i+1) + ") " + j)
+        print(str(i+1) + ") " + os.path.relpath(j, path))
     choix = -1
     while choix not in range(len(files)):
         choix = int(input(cf2c)) - 1
-    return _safe_path(path, files[choix])
+    return files[choix]
 
 def duckToIno():
     mapping = ""
@@ -63,16 +62,24 @@ def binToIno(path):
     cmd = ["python3", "./exes/duck2spark.py", "-i", path, "-l", "1", "-o", safe_ino]
     subprocess.run(cmd, check=True)
 
+def upload_ino():
+    filepath = choosefile("./ino/")
+    cmd = ["bash", "./exes/upload.sh", filepath]
+    subprocess.run(cmd)
+
 def main():
     choix = 0
-    while choix not in [1, 2]:
+    while choix not in [1, 2, 3]:
         print("1) " + cd2i)
         print("2) " + cb2i)
+        print("3) " + cu2i)
         choix = int(input(wiyc))
     if choix == 1:
         binToIno(choosefile("./bin/"))
-    if choix == 2:
+    elif choix == 2:
         duckToIno()
+    elif choix == 3:
+        upload_ino()
 
 if __name__ == '__main__':
     main()

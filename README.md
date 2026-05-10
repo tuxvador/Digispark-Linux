@@ -20,6 +20,11 @@ This project provides a simple solution to transform a Digispark microcontroller
 - [Python 3](https://www.python.org/downloads/) — Python 3 is required
 - Java — required to run `duckencoder.jar`
 
+### Optional: Command-Line Upload
+To compile and upload sketches without the Arduino IDE, install these tools:
+- [`arduino-cli`](https://arduino.github.io/arduino-cli/) — compiles .ino sketches from the command line (install Digispark core: `arduino-cli core install digistump:avr`)
+- [`micronucleus`](https://github.com/micronucleus/micronucleus) — uploads compiled .hex firmware to the Digispark (install via `sudo apt install micronucleus`)
+
 ## Usage
 1. Place a DuckyScript in the `scripts/` directory:
 ```bash
@@ -35,6 +40,25 @@ echo "STRING Hello world" > scripts/example.duck
 4. Follow the prompts to select the file and keyboard mapping.
 5. Open the generated `.ino` file from the `ino/` folder in the Arduino IDE.
 6. Click **Upload** and plug in the Digispark when prompted.
+
+### Command-Line Upload (Alternative)
+If you have `arduino-cli` and `micronucleus` installed, you can upload directly:
+
+```bash
+# Upload an existing sketch
+./exes/upload.sh ino/notepad/notepad.ino
+
+# Or convert a DuckyScript and upload in one step
+./exes/upload.sh scripts/example.duck
+```
+
+You can also use the interactive menu (option 3):
+
+```bash
+./digiducky.py
+# Choose "3) Upload sketch to Digispark"
+# Select a sketch from the ino/ directory
+```
 
 ## Troubleshooting
 On Linux, running the Arduino IDE without root privileges may produce:
@@ -57,6 +81,17 @@ sudo udevadm control --reload
 ```
 
 Then click Upload and plug in the Digispark. See the [Digistump troubleshooting page](https://digistump.com/wiki/digispark/tutorials/linuxtroubleshooting) for more details.
+
+## Included DuckEncoder JARs
+
+The `exes/` directory includes two Java JAR files from the [USB-Rubber-Ducky](https://github.com/hak5darren/USB-Rubber-Ducky) project:
+
+| File | Source |
+|------|--------|
+| `duckencoder.jar` | [hak5darren/USB-Rubber-Ducky](https://github.com/hak5darren/USB-Rubber-Ducky/blob/master/duckencoder.jar) |
+| `Ducky_Encoder_GUI.jar` | [hak5darren/USB-Rubber-Ducky](https://github.com/hak5darren/USB-Rubber-Ducky/blob/master/Ducky_Encoder_GUI.jar) |
+
+These are unmodified upstream binary files. No checksums are available from the upstream source.
 
 ## Security Notes
 - All file paths are validated to prevent path traversal attacks.

@@ -1,0 +1,2 @@
+# Core scripts use only Python 3 standard library (no external dependencies).
+# Python 3.6+ is required.
