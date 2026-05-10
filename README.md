@@ -20,6 +20,7 @@ This project provides a simple solution to transform a Digispark microcontroller
 │   └── Ducky_Encoder_GUI.jar # GUI DuckEncoder
 ├── ino/          # Generated Arduino sketches
 ├── scripts/      # DuckyScript source files
+├── tests/        # Test suite
 └── digiducky.py  # Main entry point
 ```
 
@@ -91,6 +92,16 @@ sudo udevadm control --reload
 ```
 
 Then click Upload and plug in the Digispark. See the [Digistump troubleshooting page](https://digistump.com/wiki/digispark/tutorials/linuxtroubleshooting) for more details.
+
+## Testing
+
+Run the test suite from the project root:
+
+```bash
+./tests/run_all.sh
+```
+
+This tests the Python converter, the shell compiler, and verifies generated sketch structure.
 
 ## Included DuckEncoder JARs
 

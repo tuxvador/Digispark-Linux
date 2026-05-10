@@ -67,7 +67,7 @@ void loop()
 
 	tail = '''}\n'''
 	l = len(payload)
-	hex_values = [str(hex(ord(payload[c]))) for c in range(l)]
+	hex_values = [hex(b) for b in payload]
 	declare = "#define DUCK_LEN " + str(l) + "\nconst PROGMEM uint8_t duckraw [DUCK_LEN] = {\n\t"
 	declare += ", ".join(hex_values) + "\n};\nint i = %d; //how many times the payload should run (-1 for endless loop)\n" % loop_count
 	if blink:

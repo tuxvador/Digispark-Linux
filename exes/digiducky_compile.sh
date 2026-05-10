@@ -35,8 +35,8 @@ void setup() {
 
 while read -r
 do
-  COMMAND=$(echo -E "$REPLY" | sed -e 's/ .*$//g')
-  OPTIONS=$(echo -E "$REPLY" | sed -s 's/^[^ ]* //g')
+  COMMAND=$(printf '%s\n' "$REPLY" | sed -e 's/ .*$//g')
+  OPTIONS=$(printf '%s\n' "$REPLY" | sed -s 's/^[^ ]* //g')
   MODIFIERS="0";
   KEY1="0";
   KEY2="0";
@@ -45,7 +45,7 @@ do
   then echo "  // $OPTIONS" >> $OUTFILE
   elif [ "$COMMAND" = "STRING" ] 
   then 
-    OPTIONS=$(echo "$OPTIONS" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+    OPTIONS=$(printf '%s\n' "$OPTIONS" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
     IFS=" "
     echo "	DigiKeyboard.print(\"$OPTIONS\");" >> $OUTFILE
   elif [ "$COMMAND" = "DELAY" ]
