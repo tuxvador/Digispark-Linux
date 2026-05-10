@@ -76,7 +76,7 @@ def binToIno(path):
 
 def upload_ino():
     filepath = choosefile(os.path.join(BASE_DIR, "ino") + "/")
-    cmd = ["bash", os.path.join(BASE_DIR, "exes", "upload.sh"), filepath]
+    cmd = [os.path.join(BASE_DIR, "exes", "upload.sh"), filepath]
     subprocess.run(cmd)
 
 def main():

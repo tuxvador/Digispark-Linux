@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import os
-import re
 
-PREAMBLE = '''\
+PREAMBLE = """\
 #include "DigiKeyboard.h"
 
 // Delay between keystrokes
@@ -17,29 +16,29 @@ int iterationCounter = 0;
 
 
 void setup() {
-\t// initialize the digital pin as an output.
-\tpinMode(0, OUTPUT); //LED on Model B
-\tpinMode(1, OUTPUT); //LED on Model A     
-\tdigitalWrite(0, LOW);
-\tdigitalWrite(1, LOW);
-\tDigiKeyboard.update();
-\t// this is generally not necessary but with some older systems it seems to
-\t// prevent missing the first character after a delay:
-\tDigiKeyboard.sendKeyStroke(0);
+    // initialize the digital pin as an output.
+    pinMode(0, OUTPUT); //LED on Model B
+    pinMode(1, OUTPUT); //LED on Model A
+    digitalWrite(0, LOW);
+    digitalWrite(1, LOW);
+    DigiKeyboard.update();
+    // this is generally not necessary but with some older systems it seems to
+    // prevent missing the first character after a delay:
+    DigiKeyboard.sendKeyStroke(0);
 
-\t// It's better to use DigiKeyboard.delay() over the regular Arduino delay()
-\t// if doing keyboard stuff because it keeps talking to the computer to make
-\t// sure the computer knows the keyboard is alive and connected
-\tDigiKeyboard.delay(KEYSTROKE_DELAY);
+    // It's better to use DigiKeyboard.delay() over the regular Arduino delay()
+    // if doing keyboard stuff because it keeps talking to the computer to make
+    // sure the computer knows the keyboard is alive and connected
+    DigiKeyboard.delay(KEYSTROKE_DELAY);
 
-'''
+"""
 
-POSTAMBLE = '''\
+POSTAMBLE = """\
 void loop(){
-\tdelay(1000);
-\titerationCounter++;
+    delay(1000);
+    iterationCounter++;
 }
-'''
+"""
 
 MODIFIER_MAP = {
     "GUI": "KEY_MODIFIER_LEFT_GUI",
@@ -60,40 +59,81 @@ KEY_MAP = {
     "ESCAPE": "ESC",
 }
 
+SINGLE_KEY_COMMANDS = {
+    "ENTER": "KEY_ENTER",
+    "SPACE": "KEY_SPACE",
+    "TAB": "KEY_TAB",
+    "CAPSLOCK": "KEY_CAPS_LOCK",
+    "DELETE": "KEY_DELETE",
+    "BACKSPACE": "KEY_BACKSPACE",
+    "HOME": "KEY_HOME",
+    "END": "KEY_END",
+    "INSERT": "KEY_INSERT",
+    "PAGEUP": "KEY_PAGEUP",
+    "PAGEDOWN": "KEY_PAGEDOWN",
+    "ESC": "KEY_ESC",
+    "ESCAPE": "KEY_ESC",
+    "PRINTSCREEN": "KEY_PRINT_SCREEN",
+    "SCROLLLOCK": "KEY_SCROLL_LOCK",
+    "PAUSE": "KEY_PAUSE",
+    "NUMLOCK": "KEY_NUM_LOCK",
+    "BREAK": "KEY_PAUSE",
+}
+
 
 def compile_duckyscript(infile, outfile):
+    with open(infile) as f:
+        lines = f.readlines()
+
     with open(outfile, "w") as out:
         out.write(PREAMBLE)
+        last_line = None
 
-        with open(infile) as f:
-            for line in f:
-                line = line.rstrip("\n")
-                if not line.strip():
-                    continue
+        for line in lines:
+            line = line.rstrip("\n")
+            if not line.strip():
+                continue
 
-                parts = line.split()
-                command = parts[0]
+            parts = line.split()
+            command = parts[0].upper()
 
-                if command == "REM":
-                    comment = line[4:] if len(line) > 4 else ""
-                    out.write(f"  //{comment}\n")
+            if command == "REM":
+                comment = line[3:] if len(line) > 3 else ""
+                out.write(f"    //{comment}\n")
 
-                elif command == "STRING":
-                    text = line[7:] if len(line) > 7 else ""
-                    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
-                    out.write(f'\tDigiKeyboard.print("{escaped}");\n')
+            elif command == "STRING":
+                text = line[6:] if len(line) > 6 else ""
+                text = text.lstrip()
+                escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+                emitted = f'    DigiKeyboard.print("{escaped}");\n'
+                out.write(emitted)
+                last_line = emitted
 
-                elif command == "DELAY":
+            elif command == "DELAY":
+                try:
+                    ms = int(parts[1]) * 10
+                except (IndexError, ValueError):
+                    ms = 0
+                emitted = f"    DigiKeyboard.delay({ms});\n"
+                out.write(emitted)
+                last_line = emitted
+
+            elif command == "REPEAT":
+                if last_line is not None:
                     try:
-                        ms = int(parts[1]) * 10
+                        count = int(parts[1]) - 1
                     except (IndexError, ValueError):
-                        ms = 0
-                    out.write(f"  DigiKeyboard.delay({ms});\n")
+                        count = 0
+                    for _ in range(count):
+                        out.write(last_line)
 
-                else:
-                    out.write(_parse_key_stroke(parts))
+            else:
+                emitted = _parse_key_stroke(parts)
+                out.write(emitted)
+                if command not in ("REPEAT",):
+                    last_line = emitted
 
-        out.write("\t}\n\n")
+        out.write("    }\n\n")
         out.write(POSTAMBLE)
 
 
@@ -106,6 +146,12 @@ def _parse_key_stroke(tokens):
         upper = token.upper()
         if upper in MODIFIER_MAP:
             modifiers.append(MODIFIER_MAP[upper])
+        elif upper in SINGLE_KEY_COMMANDS:
+            mapped = SINGLE_KEY_COMMANDS[upper]
+            if key1 is None:
+                key1 = mapped
+            else:
+                key2 = mapped
         else:
             mapped = KEY_MAP.get(upper, token)
             if key1 is None:
@@ -116,7 +162,7 @@ def _parse_key_stroke(tokens):
     mod_str = " | ".join(modifiers)
     k1 = key1 or "0"
     k2 = key2 or "0"
-    return f"  DigiKeyboard.sendKeyStroke({k1}, {k2}, {mod_str});\n"
+    return f"    DigiKeyboard.sendKeyStroke({k1}, {k2}, {mod_str});\n"
 
 
 def main():
